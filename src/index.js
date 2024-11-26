@@ -9,9 +9,9 @@ function Test() {
     <div>
       {" "}
       <StarRating
-        maxRating={"sdsd"}
+        maxRating={"10"}
         color="blue"
-        className={"test"}
+        // className={"test"}
         onSetRating={setMovieRating}
       />
       <h2>The movie has rated {movieRating} stars </h2>
