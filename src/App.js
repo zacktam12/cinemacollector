@@ -67,6 +67,7 @@ export default function App() {
     <>
       <NavBar>
         <Logo />
+        <Search />
         <NumResults movies={movies} />
       </NavBar>
 
@@ -93,7 +94,7 @@ function Main({ children }) {
 function NavBar({ children }) {
   return (
     <>
-      <nav className="nav-bar">{children}</nav>{" "}
+      <nav className="nav-bar">{children}</nav>
     </>
   );
 }
