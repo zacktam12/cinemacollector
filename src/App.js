@@ -55,14 +55,23 @@ const KEY = "6e0f586";
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
+  const [Loading, setLoading] = useState(false);
+  const query = "interstellar";
 
+  // useEffect used to register our code after it has painted on the screen, not as the component runs
   useEffect(function () {
-    fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
-      .then((res) => res.json())
-      .then((data) => setMovies(data.Search))
-      .catch((err) => console.error(err));
+    async function fetchMovies() {
+      setLoading(true);
+      const res = await fetch(
+        `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+      );
+      setLoading(false);
+      const data = await res.json();
+      setMovies(data.Search);
+      console.log(data.Search);
+    }
+    fetchMovies();
   }, []);
-
   return (
     <>
       <NavBar>
@@ -73,10 +82,7 @@ export default function App() {
 
       <Main>
         {" "}
-        <Box>
-          {" "}
-          <MovieList movies={movies} />
-        </Box>
+        <Box> {Loading ? <Loader /> : <MovieList movies={movies} />}</Box>
         <Box>
           {" "}
           <WatchedSummary watched={watched} />
@@ -141,22 +147,6 @@ function Box({ children }) {
     </div>
   );
 }
-/*
-function WatchedBox({ children }) {
-  const [isOpen2, setIsOpen2] = useState(true);
-
-  return (
-    <div className="box">
-      <button
-        className="btn-toggle"
-        onClick={() => setIsOpen2((open) => !open)}
-      >
-        {isOpen2 ? "–" : "+"}
-      </button>
-      {isOpen2 && children}
-    </div>
-  );
-}*/
 
 function MovieList({ movies }) {
   return (
@@ -181,6 +171,10 @@ function Movie({ movie }) {
       </div>
     </li>
   );
+}
+
+function Loader() {
+  return <div className="loader">Loading...</div>;
 }
 
 function WatchedSummary({ watched }) {

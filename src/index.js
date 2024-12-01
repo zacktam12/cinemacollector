@@ -1,4 +1,4 @@
-// import React, { useState } from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 // import StarRating from "./Star";
 import "./index.css";
@@ -19,15 +19,15 @@ import App from "./App";
 //   );
 // }
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
-//   <React.StrictMode>
-//     {/* <StarRating
-//       maxRating={5}
-//       messages={["Terrible", "Bad", "Good", "Very Good", "Amazing"]}
-//     />
-//     <StarRating color="red" size={24} className={"test"} defaultRating={3} />
-//     <Test /> */}
+root.render(
+  //     <StarRating
+  //       maxRating={5}
+  //       messages={["Terrible", "Bad", "Good", "Very Good", "Amazing"]}
+  //     />
+  //     <StarRating color="red" size={24} className={"test"} defaultRating={3} />
+  //     <Test />
 
-//     <App />
-//   </React.StrictMode>
-// );
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
