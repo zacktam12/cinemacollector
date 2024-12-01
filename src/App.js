@@ -51,40 +51,54 @@ const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 const KEY = "6e0f586";
-
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
-  const [Loading, setLoading] = useState(false);
-  const query = "interstellar";
+  const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [query, setQuery] = useState("jhkghil");
 
-  // useEffect used to register our code after it has painted on the screen, not as the component runs
-  useEffect(function () {
-    async function fetchMovies() {
-      setLoading(true);
-      const res = await fetch(
-        `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-      );
-      setLoading(false);
-      const data = await res.json();
-      setMovies(data.Search);
-      console.log(data.Search);
-    }
-    fetchMovies();
-  }, []);
+  useEffect(
+    function () {
+      async function fetchMovies() {
+        try {
+          setLoading(true);
+          const res = await fetch(
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+          );
+
+          if (!res.ok) throw new Error("Something went wrong while fetching");
+
+          const data = await res.json();
+          if (data.Response === "False") throw new Error("Movie not found");
+          setMovies(data.Search);
+        } catch (err) {
+          console.error(err.message);
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      }
+      if (query) fetchMovies();
+    },
+    [query]
+  );
+
   return (
     <>
       <NavBar>
         <Logo />
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </NavBar>
 
       <Main>
-        {" "}
-        <Box> {Loading ? <Loader /> : <MovieList movies={movies} />}</Box>
         <Box>
-          {" "}
+          {isLoading && <Loader />}
+          {!error && !isLoading && <MovieList movies={movies} />}
+          {error && <ErrorMessage message={error} />}
+        </Box>
+        <Box>
           <WatchedSummary watched={watched} />
           <WatchedMoviesList watched={watched} />
         </Box>
@@ -176,7 +190,14 @@ function Movie({ movie }) {
 function Loader() {
   return <div className="loader">Loading...</div>;
 }
-
+function ErrorMessage({ message }) {
+  return (
+    <div className="error">
+      <span>🌋</span>
+      {message}
+    </div>
+  );
+}
 function WatchedSummary({ watched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
