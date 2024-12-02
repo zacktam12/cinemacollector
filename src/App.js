@@ -56,13 +56,14 @@ export default function App() {
   const [watched, setWatched] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [query, setQuery] = useState("jhkghil");
+  const [query, setQuery] = useState("");
 
   useEffect(
     function () {
       async function fetchMovies() {
         try {
           setLoading(true);
+          setError("");
           const res = await fetch(
             `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
           );
@@ -79,7 +80,12 @@ export default function App() {
           setLoading(false);
         }
       }
-      if (query) fetchMovies();
+      if (query.length < 3) {
+        setMovies([]);
+        setError("");
+        return;
+      }
+      fetchMovies();
     },
     [query]
   );
@@ -136,9 +142,7 @@ function NumResults({ movies }) {
   );
 }
 
-function Search() {
-  const [query, setQuery] = useState();
-
+function Search({ query, setQuery }) {
   return (
     <input
       className="search"
