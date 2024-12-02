@@ -55,6 +55,10 @@ body {
   background-color: var(--color-background-500);
   border-radius: 0.9rem;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Ensure it adapts properly */
+  max-height: 100%; /* If it needs to respect parent limits */
 }
 
 .loader {
@@ -137,6 +141,9 @@ body {
 .list {
   list-style: none;
   padding: 0.8rem 0;
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: calc(100% - 3rem); /* Adjust height based on the content */
+  scrollbar-width: thin; /* For modern browsers */
 }
 
 .list-watched {
@@ -184,6 +191,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  overflow-y: auto;
 }
 
 .btn-delete {
