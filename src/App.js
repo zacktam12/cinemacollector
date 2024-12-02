@@ -48,11 +48,14 @@ const tempWatchedData = [
   },
 ];
 
+// Helper function to calculate the average of an array of numbers
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-const KEY = "6e0f586";
+const KEY = "6e0f586"; // OMDB API key
+
 export default function App() {
+  // State variables to manage movies, watched list, and UI states
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setLoading] = useState(false);
@@ -60,52 +63,57 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null);
   const [query, setQuery] = useState("");
 
+  // Handles selecting and deselecting a movie
   function handleSelectedId(id) {
     setSelectedId((selectedId) => (id === selectedId ? null : id));
   }
 
+  // Closes the selected movie details view
   function handleClose() {
     setSelectedId(null);
   }
+
+  // Adds a movie to the watched list
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
   }
 
+  // Deletes a movie from the watched list
   function handleDeleteMovie(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
 
-  useEffect(
-    function () {
-      async function fetchMovies() {
-        try {
-          setLoading(true);
-          setError("");
-          const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-          );
-
-          if (!res.ok) throw new Error("Something went wrong while fetching");
-
-          const data = await res.json();
-          if (data.Response === "False") throw new Error("Movie not found");
-          setMovies(data.Search);
-        } catch (err) {
-          console.error(err.message);
-          setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      }
-      if (query.length < 3) {
-        setMovies([]);
+  // Fetch movies based on the search query
+  useEffect(() => {
+    async function fetchMovies() {
+      try {
+        setLoading(true);
         setError("");
-        return;
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+        );
+
+        if (!res.ok) throw new Error("Something went wrong while fetching");
+
+        const data = await res.json();
+        if (data.Response === "False") throw new Error("Movie not found");
+        setMovies(data.Search);
+      } catch (err) {
+        console.error(err.message);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-      fetchMovies();
-    },
-    [query]
-  );
+    }
+
+    if (query.length < 3) {
+      setMovies([]);
+      setError("");
+      return;
+    }
+
+    fetchMovies();
+  }, [query]);
 
   return (
     <>
@@ -146,18 +154,17 @@ export default function App() {
   );
 }
 
+// Main container for the application layout
 function Main({ children }) {
   return <main className="main">{children}</main>;
 }
 
+// Navigation bar with logo, search, and results count
 function NavBar({ children }) {
-  return (
-    <>
-      <nav className="nav-bar">{children}</nav>
-    </>
-  );
+  return <nav className="nav-bar">{children}</nav>;
 }
 
+// Logo component for branding
 function Logo() {
   return (
     <div className="logo">
@@ -167,6 +174,7 @@ function Logo() {
   );
 }
 
+// Displays the number of search results found
 function NumResults({ movies }) {
   return (
     <p className="num-results">
@@ -175,6 +183,7 @@ function NumResults({ movies }) {
   );
 }
 
+// Search input field for movies
 function Search({ query, setQuery }) {
   return (
     <input
@@ -187,6 +196,7 @@ function Search({ query, setQuery }) {
   );
 }
 
+// Collapsible box component for organizing content
 function Box({ children }) {
   const [isOpen, setIsOpen] = useState(true);
   return (
@@ -199,6 +209,7 @@ function Box({ children }) {
   );
 }
 
+// List of movies displayed based on search results
 function MovieList({ movies, onSelectMovie }) {
   return (
     <ul className="list list-movies">
@@ -209,6 +220,7 @@ function MovieList({ movies, onSelectMovie }) {
   );
 }
 
+// Single movie item in the movie list
 function Movie({ movie, onSelectMovie }) {
   return (
     <li onClick={() => onSelectMovie(movie.imdbID)}>
@@ -224,6 +236,7 @@ function Movie({ movie, onSelectMovie }) {
   );
 }
 
+// Detailed view of a selected movie
 function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [movie, setMovie] = useState(null);
   const [isLoading, setLoading] = useState(false);
@@ -232,6 +245,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const watchedUserRating = watched.find(
     (movie) => movie.imdbID === selectedId
   )?.userRating;
+
   useEffect(() => {
     async function getMovieDetails() {
       setLoading(true);
@@ -250,7 +264,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     getMovieDetails();
   }, [selectedId]);
 
-  // Early return for loading or null movie
   if (isLoading) return <Loader />;
   if (!movie) return <div>No movie details available</div>;
 
@@ -279,6 +292,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     };
 
     onAddWatched(newWatchedMovie);
+    onCloseMovie();
   }
 
   return (
@@ -309,7 +323,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
                 size={24}
                 onSetRating={setUserRating}
               />
-
               {userRating > 0 && (
                 <button className="btn-add" onClick={handleAdd}>
                   + Add to list
@@ -319,7 +332,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
           </>
         ) : (
           <p>
-            You rated with movie {watchedUserRating}
+            You rated this movie {watchedUserRating}
             <span>⭐</span>
           </p>
         )}
@@ -331,9 +344,12 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   );
 }
 
+// Loader component displayed during data fetch
 function Loader() {
   return <div className="loader">Loading...</div>;
 }
+
+// Displays error messages
 function ErrorMessage({ message }) {
   return (
     <div className="error">
@@ -342,6 +358,8 @@ function ErrorMessage({ message }) {
     </div>
   );
 }
+
+// Summary statistics for watched movies
 function WatchedSummary({ watched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
@@ -356,21 +374,22 @@ function WatchedSummary({ watched }) {
         </p>
         <p>
           <span>⭐️</span>
-          <span>{avgImdbRating.toFixed(2)}</span>
+          <span>{avgImdbRating.toFixed(1)}</span>
         </p>
         <p>
           <span>🌟</span>
-          <span>{avgUserRating.toFixed(2)}</span>
+          <span>{avgUserRating.toFixed(1)}</span>
         </p>
         <p>
           <span>⏳</span>
-          <span>{avgRuntime} min</span>
+          <span>{avgRuntime.toFixed(1)} min</span>
         </p>
       </div>
     </div>
   );
 }
 
+// List of watched movies
 function WatchedMoviesList({ watched, onDeleteWatched }) {
   return (
     <ul className="list">
@@ -385,6 +404,7 @@ function WatchedMoviesList({ watched, onDeleteWatched }) {
   );
 }
 
+// Individual watched movie entry
 function WatchedMovie({ movie, onDeleteWatched }) {
   return (
     <li>
@@ -407,8 +427,7 @@ function WatchedMovie({ movie, onDeleteWatched }) {
           className="btn-delete"
           onClick={() => onDeleteWatched(movie.imdbID)}
         >
-          {" "}
-          ❌
+          X
         </button>
       </div>
     </li>
