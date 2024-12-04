@@ -69,7 +69,7 @@ export default function App() {
   }
 
   // Closes the selected movie details view
-  function handleClose() {
+  function handleCloseMovie() {
     setSelectedId(null);
   }
 
@@ -85,12 +85,15 @@ export default function App() {
 
   // Fetch movies based on the search query
   useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchMovies() {
       try {
         setLoading(true);
         setError("");
         const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+          { signal: controller.signal }
         );
 
         if (!res.ok) throw new Error("Something went wrong while fetching");
@@ -98,9 +101,12 @@ export default function App() {
         const data = await res.json();
         if (data.Response === "False") throw new Error("Movie not found");
         setMovies(data.Search);
+        setError("");
       } catch (err) {
-        console.error(err.message);
-        setError(err.message);
+        if (err.name !== "AbortError") {
+          console.error(err.message);
+          setError(err.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -111,8 +117,11 @@ export default function App() {
       setError("");
       return;
     }
-
+    handleCloseMovie();
     fetchMovies();
+    return function () {
+      controller.abort();
+    };
   }, [query]);
 
   return (
@@ -135,7 +144,7 @@ export default function App() {
           {selectedId ? (
             <MovieDetails
               selectedId={selectedId}
-              onCloseMovie={handleClose}
+              onCloseMovie={handleCloseMovie}
               onAddWatched={handleAddWatched}
               watched={watched}
             />
@@ -287,9 +296,25 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
       document.title = `movie | ${title}`;
       return function () {
         document.title = "usePopcorn";
+        // console.log(`the movie is cleaned up ${title}`);
       };
     },
     [title]
+  );
+
+  useEffect(
+    function () {
+      function callBack(e) {
+        if (e.code === "Escape") {
+          onCloseMovie();
+        }
+      }
+      document.addEventListener("keydown", callBack);
+      return function () {
+        document.removeEventListener("keydown", callBack);
+      };
+    },
+    [onCloseMovie]
   );
 
   if (isLoading) return <Loader />;
