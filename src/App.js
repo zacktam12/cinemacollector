@@ -95,7 +95,7 @@ export default function App() {
           `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
           { signal: controller.signal }
         );
-        // error handler
+        // error handler and
         if (!res.ok) throw new Error("Something went wrong while fetching");
 
         const data = await res.json();
