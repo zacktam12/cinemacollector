@@ -2,59 +2,47 @@ import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import useMovies from "./useMovies";
 import useLocalStorageState from "./useLocalStorageState";
+import useKey from "./useKey";
 
-const tempWatchedData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    runtime: 148,
-    imdbRating: 8.8,
-    userRating: 10,
-  },
-  {
-    imdbID: "tt0088763",
-    Title: "Back to the Future",
-    Year: "1985",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-    runtime: 116,
-    imdbRating: 8.5,
-    userRating: 9,
-  },
-];
+// API Key for OMDb API
 const KEY = "6e0f586";
 
+// Utility function to calculate the average of an array
 const average = (arr) =>
   arr.reduce((sum, val) => sum + val, 0) / arr.length || 0;
 
+// Main App component
 export default function App() {
-  const [selectedId, setSelectedId] = useState(null);
-  const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState(null); // State for selected movie ID
+  const [query, setQuery] = useState(""); // State for search query
 
+  // Custom hooks for fetching movies and managing watched list
   const { movies, error, isLoading } = useMovies(query);
   const [watched, setWatched] = useLocalStorageState([], "watched");
 
+  // Handle selecting/deselecting a movie
   function handleSelectedId(id) {
     setSelectedId((selectedId) => (id === selectedId ? null : id));
   }
 
+  // Close movie details view
   function handleCloseMovie() {
     setSelectedId(null);
   }
 
+  // Add a movie to the watched list
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
   }
 
+  // Remove a movie from the watched list
   function handleDeleteMovie(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
 
   return (
     <>
+      {/* Navigation bar */}
       <NavBar>
         <Logo />
         <Search query={query} setQuery={setQuery} />
@@ -62,6 +50,7 @@ export default function App() {
       </NavBar>
 
       <Main>
+        {/* Movie list or loader/error messages */}
         <Box>
           {isLoading && <Loader />}
           {!error && !isLoading && movies?.length > 0 && (
@@ -69,6 +58,8 @@ export default function App() {
           )}
           {error && <ErrorMessage message={error} />}
         </Box>
+
+        {/* Movie details or watched list */}
         <Box>
           {selectedId ? (
             <MovieDetails
@@ -92,14 +83,17 @@ export default function App() {
   );
 }
 
+// Main container for the app's content
 function Main({ children }) {
   return <main className="main">{children}</main>;
 }
 
+// Navigation bar component
 function NavBar({ children }) {
   return <nav className="nav-bar">{children}</nav>;
 }
 
+// Logo component
 function Logo() {
   return (
     <div className="logo">
@@ -109,6 +103,7 @@ function Logo() {
   );
 }
 
+// Component to display the number of results found
 function NumResults({ movies }) {
   return (
     <p className="num-results">
@@ -117,20 +112,16 @@ function NumResults({ movies }) {
   );
 }
 
+// Search bar component
 function Search({ query, setQuery }) {
-  const inputEl = useRef();
+  const inputEl = useRef(); // Ref to focus the input element
 
-  useEffect(() => {
-    function handleKeyDown(e) {
-      if (document.activeElement === inputEl.current) return;
-      if (e.code === "Enter") {
-        inputEl.current.focus();
-        setQuery("");
-      }
-    }
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [setQuery]);
+  // Use Enter key to reset the query and focus the input
+  useKey("Enter", function () {
+    if (document.activeElement === inputEl.current) return;
+    inputEl.current.focus();
+    setQuery("");
+  });
 
   return (
     <input
@@ -144,6 +135,7 @@ function Search({ query, setQuery }) {
   );
 }
 
+// Reusable container with a toggle button
 function Box({ children }) {
   const [isOpen, setIsOpen] = useState(true);
   return (
@@ -156,6 +148,7 @@ function Box({ children }) {
   );
 }
 
+// List of movies
 function MovieList({ movies, onSelectMovie }) {
   return (
     <ul className="list list-movies">
@@ -166,6 +159,7 @@ function MovieList({ movies, onSelectMovie }) {
   );
 }
 
+// Single movie item in the list
 function Movie({ movie, onSelectMovie }) {
   return (
     <li onClick={() => onSelectMovie(movie.imdbID)}>
@@ -184,13 +178,15 @@ function Movie({ movie, onSelectMovie }) {
   );
 }
 
+// Movie details view
 function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
-  const [movie, setMovie] = useState(null);
-  const [isLoading, setLoading] = useState(false);
-  const [userRating, setUserRating] = useState("");
+  const [movie, setMovie] = useState(null); // State for movie details
+  const [isLoading, setLoading] = useState(false); // Loading state
+  const [userRating, setUserRating] = useState(""); // User's rating
+  const countRef = useRef(0); // Count of user rating updates
 
-  const countRef = useRef(0);
   useEffect(() => {
+    // Increment rating update count when userRating changes
     if (userRating) countRef.current++;
   }, [userRating]);
 
@@ -199,6 +195,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     (movie) => movie.imdbID === selectedId
   )?.userRating;
 
+  // Destructure movie details for easier access
   const {
     Title: title,
     Year: year = "",
@@ -213,6 +210,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   } = movie || {};
 
   useEffect(() => {
+    // Fetch movie details when selectedId changes
     async function getMovieDetails() {
       setLoading(true);
       try {
@@ -234,23 +232,19 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   }, [selectedId]);
 
   useEffect(() => {
+    // Update document title with the movie title
     if (!title) return;
     document.title = `Movie | ${title}`;
     return () => (document.title = "usePopcorn");
   }, [title]);
 
-  useEffect(() => {
-    function handleEscape(e) {
-      if (e.code === "Escape") onCloseMovie();
-    }
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [onCloseMovie]);
+  useKey("Escape", onCloseMovie); // Close movie details on Escape key
 
   if (isLoading) return <Loader />;
   if (!movie) return <div>No movie details available</div>;
 
   function handleAdd() {
+    // Add the movie to the watched list
     const newWatchedMovie = {
       imdbID: selectedId,
       title,
@@ -267,6 +261,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
   return (
     <div className="details">
+      {/* Header with movie overview */}
       <header>
         <button className="btn-back" onClick={onCloseMovie}>
           &larr;
@@ -284,6 +279,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
           </p>
         </div>
       </header>
+      {/* Section with additional details and rating */}
       <section>
         {!isWatched ? (
           <div className="rating">
@@ -308,10 +304,12 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   );
 }
 
+// Loader component
 function Loader() {
   return <div className="loader">Loading...</div>;
 }
 
+// Error message component
 function ErrorMessage({ message }) {
   return (
     <div className="error">
@@ -321,6 +319,7 @@ function ErrorMessage({ message }) {
   );
 }
 
+// Summary of watched movies
 function WatchedSummary({ watched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
@@ -350,6 +349,7 @@ function WatchedSummary({ watched }) {
   );
 }
 
+// List of watched movies
 function WatchedMoviesList({ watched, onDeleteWatched }) {
   return (
     <ul className="list">
@@ -364,6 +364,7 @@ function WatchedMoviesList({ watched, onDeleteWatched }) {
   );
 }
 
+// Single movie in the watched list
 function WatchedMovie({ movie, onDeleteWatched }) {
   return (
     <li>

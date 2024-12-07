@@ -7,6 +7,11 @@ const containerStyle = {
   gap: "16px",
 };
 
+const starContainerStyle = {
+  display: "flex",
+};
+
+// PropTypes to validate the props passed to the component
 StarRating.propTypes = {
   maxRating: PropTypes.number,
   defaultRating: PropTypes.number,
@@ -17,10 +22,7 @@ StarRating.propTypes = {
   onSetRating: PropTypes.func,
 };
 
-const starContainerStyle = {
-  display: "flex",
-};
-
+// StarRating Component
 export default function StarRating({
   maxRating = 5,
   color = "#fcc419",
@@ -30,14 +32,19 @@ export default function StarRating({
   defaultRating = 0,
   onSetRating = () => {},
 }) {
+  // State to store the current rating
   const [rating, setRating] = useState(defaultRating);
+
+  // State to temporarily store the hovered rating
   const [tempRating, setTempRating] = useState(0);
 
+  // Function to handle when a rating is clicked
   function handleOnRating(rating) {
     setRating(rating);
     onSetRating(rating);
   }
 
+  // Inline style for the text displaying the rating or message
   const textStyle = {
     lineHeight: "1",
     margin: "0",
@@ -45,13 +52,15 @@ export default function StarRating({
     color: color,
   };
 
+  // Determine the message or rating to display
   const displayMessage =
     messages.length === maxRating
       ? messages[tempRating ? tempRating - 1 : rating - 1] || ""
       : tempRating || rating || "";
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} className={className}>
+      {/* Render the stars */}
       <div style={starContainerStyle}>
         {Array.from({ length: maxRating }, (_, i) => (
           <Star
@@ -65,12 +74,15 @@ export default function StarRating({
           />
         ))}
       </div>
+      {/* Display the message or rating */}
       <p style={textStyle}>{displayMessage}</p>
     </div>
   );
 }
 
+// Star Component
 function Star({ onRate, full, onHoverOut, onHoverIn, color, size }) {
+  // Inline styles for each star
   const starStyle = {
     width: `${size}px`,
     height: `${size}px`,
@@ -78,6 +90,7 @@ function Star({ onRate, full, onHoverOut, onHoverIn, color, size }) {
     display: "block",
     color,
   };
+
   return (
     <span
       role="button"
@@ -86,6 +99,7 @@ function Star({ onRate, full, onHoverOut, onHoverIn, color, size }) {
       onMouseEnter={onHoverIn}
       onMouseLeave={onHoverOut}
     >
+      {/* Render full or empty star based on the 'full' prop */}
       {full ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -100,7 +114,7 @@ function Star({ onRate, full, onHoverOut, onHoverIn, color, size }) {
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
-          stroke={color}
+          stroke={color} // Empty star border color
           strokeWidth="2"
         >
           <path
