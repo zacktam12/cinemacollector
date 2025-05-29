@@ -20,14 +20,15 @@ function Test() {
 }
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  //     <StarRating
-  //       maxRating={5}
-  //       messages={["Terrible", "Bad", "Good", "Very Good", "Amazing"]}
-  //     />
-  //     <StarRating color="red" size={24} className={"test"} defaultRating={3} />
-  //     <Test />
-
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <>
+    <StarRating
+      maxRating={5}
+      messages={["Terrible", "Bad", "Good", "Very Good", "Amazing"]}
+    />
+    <StarRating color="red" size={24} className={"test"} defaultRating={3} />
+    <Test />
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  </>
 );
