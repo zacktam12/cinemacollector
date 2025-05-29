@@ -3,21 +3,21 @@ import ReactDOM from "react-dom/client";
 // import StarRating from "./Star";
 import "./index.css";
 import App from "./App";
-// function Test() {
-//   const [movieRating, setMovieRating] = useState(0);
-//   return (
-//     <div>
-//       {" "}
-//       <StarRating
-//         maxRating={"10"}
-//         color="blue"
-//         // className={"test"}
-//         onSetRating={setMovieRating}
-//       />
-//       <h2>The movie has rated {movieRating} stars </h2>
-//     </div>
-//   );
-// }
+function Test() {
+  const [movieRating, setMovieRating] = useState(0);
+  return (
+    <div>
+      {" "}
+      <StarRating
+        maxRating={"10"}
+        color="blue"
+        // className={"test"}
+        onSetRating={setMovieRating}
+      />
+      <h2>The movie has rated {movieRating} stars </h2>
+    </div>
+  );
+}
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   //     <StarRating
