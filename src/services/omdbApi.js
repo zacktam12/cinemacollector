@@ -17,12 +17,24 @@ export const searchMovies = async (query, page = 1, signal) => {
     return cachedData;
   }
 
-  const url = `${OMDB_API_BASE_URL}?apikey=${OMDB_API_KEY}&s=${query}&page=${page}`;
+  const url = `${OMDB_API_BASE_URL}?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(query)}&page=${page}`;
   
-  const response = await fetch(url, { signal });
+  let response;
+  try {
+    response = await fetch(url, { signal });
+  } catch (err) {
+    if (err?.name === "AbortError") throw err; // propagate abort to caller
+    throw new Error("Network error while contacting OMDb. Check your connection and try again.");
+  }
   
   if (!response.ok) {
-    throw new Error("Something went wrong while fetching movies. Please try again.");
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("OMDb authentication failed. Check that VITE_OMDB_API_KEY is set correctly.");
+    }
+    if (response.status === 429) {
+      throw new Error("OMDb rate limit exceeded. Please wait a moment and try again.");
+    }
+    throw new Error(`Failed to fetch movies (HTTP ${response.status}). Please try again.`);
   }
 
   const data = await response.json();
