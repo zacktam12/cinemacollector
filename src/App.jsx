@@ -11,7 +11,6 @@ import {
   WatchedMoviesList,
   ToWatchList,
   FavoritesList,
-  ExportImportControls,
 } from "@features/lists";
 import { RecommendationsPanel } from "@features/recommendations";
 import { AnalyticsDashboard } from "@features/analytics";
@@ -118,44 +117,9 @@ export default function App() {
     });
   };
 
-  const handleExport = () => {
-    const data = {
-      watched,
-      toWatch,
-      favorites,
-      exportDate: new Date().toISOString(),
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `usePopcorn-backup-${new Date().toISOString().split("T")[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Data exported successfully!");
-  };
+  // Export/import functionality removed per request
 
-  const handleImport = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = JSON.parse(e.target.result);
-        if (data.watched) setWatched(data.watched);
-        if (data.toWatch) setToWatch(data.toWatch);
-        if (data.favorites) setFavorites(data.favorites);
-        toast.success("Data imported successfully!");
-      } catch (err) {
-        toast.error("Failed to import data. Please check the file format.");
-        console.error(err);
-      }
-    };
-    reader.readAsText(file);
-  };
+  
 
   const totalPages = Math.ceil(totalResults / RESULTS_PER_PAGE);
 
@@ -227,10 +191,6 @@ export default function App() {
           ) : (
             <>
               <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
-              <ExportImportControls
-                onExport={handleExport}
-                onImport={handleImport}
-              />
 
               {activeTab === "watched" && (
                 <>
