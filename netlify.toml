@@ -49,3 +49,4 @@
 # Functions (if needed in the future)
 [functions]
   directory = "netlify/functions"
+
